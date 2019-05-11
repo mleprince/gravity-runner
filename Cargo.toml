@@ -1,0 +1,8 @@
+[package]
+name = "gravity-runner"
+version = "0.1.0"
+authors = ["Maxime Leprince <maxime.leprince@bioserenity.com>"]
+edition = "2018"
+
+[dependencies]
+ quicksilver = "*"
