@@ -12,13 +12,15 @@ impl World {
          */
         let mut matrix = Vec::new();
 
+        let mut k = 0;
+
         for i in 0..world_length {
-            if i % 2 == 0 {
-                matrix.push(vec![(2, Color::RED), (window_height - 2, Color::RED)]);
-            } else if i % 3 == 0 {
-                matrix.push(vec![(4, Color::RED), (window_height - 2, Color::RED)]);
+            matrix.push(vec![(2+k, Color::RED), (window_height - 2 - k , Color::RED)]);
+
+            if k < 5 {
+                k += 1;
             } else {
-                matrix.push(vec![(3, Color::BLUE), (window_height - 2, Color::BLUE)]);
+                k = 0;
             }
         }
 

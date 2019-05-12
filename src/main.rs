@@ -3,14 +3,15 @@ extern crate quicksilver;
 mod runner;
 mod world;
 
+use quicksilver::lifecycle::Event;
 use world::World;
 
 use quicksilver::{
     geom::{Circle, Line, Rectangle, Shape, Transform, Triangle, Vector},
     graphics::{Background::Col, Color, View},
-    input::Key,
+    input::{ButtonState, Key},
     lifecycle::{run, Settings, State, Window},
-    Result,
+    prelude, Result,
 };
 
 use runner::*;
@@ -24,6 +25,7 @@ struct Game {
 const SQUARE_SIZE: u32 = 20; // in pixels
 const SQUARE_SPEED: f64 = 10.0; // 1 carré qui disparait par second
 const WIDTH: u32 = 800;
+const GRAVITY_FORCE: u32 = 2;
 
 impl Game {
     fn draw_world(self: &Self, window: &mut Window) -> Result<Vec<Rectangle>> {
@@ -49,7 +51,6 @@ impl Game {
         let mut rectangles = Vec::new();
 
         for i in 0..(WIDTH / SQUARE_SIZE) + 1 {
-
             let x: i32 = (i * SQUARE_SIZE) as i32 - (self.position as u32 % SQUARE_SIZE) as i32;
 
             for (sqare_pos_y, color) in &self.world.matrix[(index_world + i) as usize] {
@@ -70,41 +71,40 @@ impl Game {
     }
 
     fn draw_runners(self: &mut Self, window: &mut Window, rectangles: Vec<Rectangle>) {
-        for runner in &mut self.runners {
-            // check if runner is in flight
+        self.runners
+            .iter_mut()
+            .filter(|runner| !runner.dead)
+            .for_each(|runner| {
+                if runner.in_flight(&rectangles) {
+                    println!("Fall !");
+                    runner.fall();
+                }
 
-            let runner_shape = Rectangle::new(
-                (runner.pos_x, runner.pos_y),
-                (runner::RUNNER_SIZE, runner::RUNNER_SIZE),
-            );
+                let pixel_speed = Self::get_pixel_speed(window.update_rate()) as f32;
 
-            let collisions : Vec<Rectangle> = rectangles
-                .iter()
-                .filter(|rectangle| rectangle.overlaps_rectangle(&runner_shape))
-                .cloned()
-                .collect();
+                if runner.blocked(&rectangles) {
+                    println!("blocked !");
+                    runner.go_back(pixel_speed);
+                } else if runner.is_late(window.screen_size()) {
+                    runner.accelerate(pixel_speed / 2.0);
+                }
 
-            if runner.in_flight(&collisions) {
-                runner.fall();
-            }
+                runner.is_alive(window.screen_size());
 
-            if runner.blocked(&collisions) {
-                runner.go_back();
-            }
-
-            window.draw(
-                &Rectangle::new((runner.pos_x, runner.pos_y), (SQUARE_SIZE, SQUARE_SIZE)),
-                Col(runner.color),
-            );
-        }
+                window.draw(&runner.shape, Col(runner.color));
+            });
     }
 
     fn increment_position(self: &mut Self, update_rate: f64) {
-        self.position += SQUARE_SIZE as f64 * SQUARE_SPEED / (1000.0 / update_rate);
+        self.position += Self::get_pixel_speed(update_rate);
 
         if self.position > 100000.0 {
             self.position = 0.0;
         }
+    }
+
+    fn get_pixel_speed(update_rate: f64) -> f64 {
+        SQUARE_SIZE as f64 * SQUARE_SPEED / (1000.0 / update_rate)
     }
 }
 
@@ -128,6 +128,17 @@ impl State for Game {
 
         self.increment_position(window.update_rate());
 
+        Ok(())
+    }
+
+    fn event(&mut self, event: &Event, _: &mut Window) -> Result<()> {
+        if let Event::Key(Key::Space, ButtonState::Pressed) = event {
+            for runner in &mut self.runners {
+                if !runner.is_falling {
+                    runner.change_gravity();
+                }
+            }
+        }
         Ok(())
     }
 }
