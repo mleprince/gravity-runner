@@ -92,8 +92,7 @@ impl GameState for MenuState {
         None
     }
     fn handle_event(&mut self, event: &Event) -> Option<GameTransition> {
-        let mut transition: Option<GameTransition> = None;
-
+    
         if let Event::Key(key, ButtonState::Pressed) = event {
             if key == &Key::Return {
                 return Some(GameTransition::MenuToRun);
@@ -115,8 +114,6 @@ impl GameState for MenuState {
                 for i in 0..index {
                     let runner = Runner::default(300, 300 + 50 * i, i);
                     self.data.runners.push(runner);
-                    println!("sdfsdf");
-                    println!("{:?}", self.data.runners);
                 }
 
                 return Some(GameTransition::MenuToRun);

@@ -75,7 +75,6 @@ impl Runner {
 
     pub fn update_position(self: &mut Self, other_runners: &[Runner], world: &[Rectangle]) {
         if self.in_flight(world, other_runners) {
-            println!("Fall !");
             self.fall();
         }
 

@@ -1,7 +1,7 @@
 use crate::states::run::RunState;
+use crate::states::menu::MenuState;
 use crate::model::runner::*;
 use crate::model::world::*;
-use quicksilver::input::Key;
 use quicksilver::lifecycle::Event;
 use quicksilver::lifecycle::State;
 use quicksilver::lifecycle::Window;
@@ -18,6 +18,7 @@ use quicksilver::graphics::Color;
 
 pub enum GameTransition {
     MenuToRun,
+    RunToMenu
 }
 
 #[derive(Clone)]
@@ -62,7 +63,11 @@ impl State for StateManager {
                 self.current_state = Box::new(RunState {
                     data: self.current_state.get_data(),
                 });
-            }
+            },
+            Some(GameTransition::RunToMenu) => {
+                println!("Go to menu !!");
+                self.current_state = Box::new(MenuState::new(self.current_state.get_data()));
+            },
             _ => (),
         }
 

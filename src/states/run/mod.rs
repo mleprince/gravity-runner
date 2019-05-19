@@ -1,8 +1,7 @@
+use crate::model::runner::*;
 use crate::state_manager::GameState;
 use crate::state_manager::GameTransition;
-use crate::model::runner::*;
 use quicksilver::prelude::*;
-
 
 use crate::state_manager::GameData;
 
@@ -57,6 +56,10 @@ impl GameState for RunState {
 
     fn handle_event(&mut self, event: &Event) -> Option<GameTransition> {
         if let Event::Key(key, ButtonState::Pressed) = event {
+            if key == &Key::Escape {
+                return Some(GameTransition::RunToMenu);
+            }
+       
             for runner in &mut self.data.runners {
                 if !runner.is_dead && !runner.is_falling && key == &runner.key {
                     runner.change_gravity();
