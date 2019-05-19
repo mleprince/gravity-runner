@@ -7,7 +7,7 @@ use quicksilver::prelude::Background::Col;
 
 pub const RUNNER_SIZE: u32 = 20; // square in pixels
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub enum Gravity {
     UP = -1,
     DOWN = 1,
@@ -33,7 +33,7 @@ impl Not for Gravity {
     }
 }
 
-#[derive(Copy, Clone, PartialEq)]
+#[derive(Copy, Clone, PartialEq, Debug)]
 pub struct Runner {
     pub color: Color,
     pub shape: Rectangle,
@@ -44,19 +44,36 @@ pub struct Runner {
 }
 
 impl Runner {
-    pub fn default(pos_x: u32, pos_y: u32, color: Color, key: Key) -> Runner {
+    pub fn default(pos_x: u32, pos_y: u32, index: u32) -> Runner {
         Runner {
-            color,
+            color: Self::get_runner_color(index),
             shape: Rectangle::new((pos_x, pos_y), (RUNNER_SIZE, RUNNER_SIZE + 10)),
             gravity: Gravity::DOWN,
             is_falling: false,
-            key,
+            key: Self::get_runner_key(index),
             is_dead: false,
         }
     }
 
-    pub fn update_position(self: &mut Self, other_runners: &[Runner], world: &[Rectangle]) {
+    fn get_runner_color(index: u32) -> Color {
+        match index {
+            0 => Color::YELLOW,
+            1 => Color::BLUE,
+            2 => Color::GREEN,
+            _ => Color::BLACK,
+        }
+    }
 
+    fn get_runner_key(index: u32) -> Key {
+        match index {
+            0 => Key::A,
+            1 => Key::M,
+            2 => Key::Space,
+            _ => Key::P,
+        }
+    }
+
+    pub fn update_position(self: &mut Self, other_runners: &[Runner], world: &[Rectangle]) {
         if self.in_flight(world, other_runners) {
             println!("Fall !");
             self.fall();

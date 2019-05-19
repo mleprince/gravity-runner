@@ -1,12 +1,8 @@
-use crate::runner::Runner;
 use crate::state_manager::GameState;
 use crate::state_manager::GameTransition;
-use crate::world::World;
-use quicksilver::graphics::Color;
-use quicksilver::input::ButtonState;
-use quicksilver::input::Key;
-use quicksilver::lifecycle::Event;
-use quicksilver::lifecycle::Window;
+use crate::model::runner::*;
+use quicksilver::prelude::*;
+
 
 use crate::state_manager::GameData;
 
